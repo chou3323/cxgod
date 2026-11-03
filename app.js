@@ -46,9 +46,9 @@ document.addEventListener('click',e=>{if(!e.target.closest('.sbox'))sr.hidden=tr
 function slotRow(s){const p=P[s[0]];return `<a class="slot" href="#/part/${encodeURIComponent(s[0])}">${img(p?.img,'')}<span class="grow"><span class="muted">${TZ[p?.cat]||''}</span> ${kind('正選')}<br><b>${esc(pname(s[0]))}</b> ${p?ownb(p):''}${p?.best?`<br><span class="muted">最佳包：${esc(kname(p.best.pack))}</span>`:''}</span></a>`+
  (s[1].length?`<div class="alts">${s[1].map(a=>`<div>${kind(a[1])} ${plink(a[0])} ${tag(a[2])} <span class="muted">${esc(a[3])}</span></div>`).join('')}</div>`:'')}
 function comboCard(c){return `<a class="card row" href="#/combo/${c.id}" style="color:inherit">${img(cimg(c))}<span class="grow"><b>${comboName(c)}</b><br><span class="muted">${esc(c.creator)}｜${esc(c.style)}</span><br>${tag(c.tag)}</span></a>`}
-function home(){const t=D.teams;app.innerHTML=`<h1>CX 神 總攻略</h1><p class="muted">以阿銘為主、阿土／深藏blue／雪兔／WBO 為輔。點陀螺 → 看每個零件 → 看哪包出、最緊版本、平替、怕什麼。沒有 G 輔助（暫不買），EVA 整組收藏不拆。</p>
+function home(){const t=D.teams;app.innerHTML=`<h1>CX 神 總攻略</h1><p class="muted">以阿銘為主、阿土／深藏blue／雪兔／WBO 為輔。點陀螺 → 看每個零件 → 看哪包出、最緊版本、平替、怕什麼。G 輔助已購 2 片，EVA 整組收藏不拆。</p>
 <div class="info">標籤：${tag('阿銘')} 影片/留言親口說 ${tag('chou轉述')} ${tag('阿土')} 其他創作者／賽果 ${tag('推斷')} 沒人實證，先測試 ${tag('查無')}</div>
-<h2>我的隊伍</h2><a class="card row" style="color:inherit" href="#/team">${img(P['main:爆擊']?.img)}<span class="grow"><b>我的配置：1 隊／2 隊＋組裝</b><br><span class="muted">${(D.mine?.teams||[]).map(T=>T.beys.map(b=>b.name).join('、')).join('｜')}</span></span></a><h2>推薦 3CX 隊伍（參考）</h2>${t.map(x=>`<div class="card"><h3>${esc(x.name)} ${tag(x.tag)}</h3>${x.ids.map(i=>comboCard(CMAP[i])).join('')}<p class="muted">${esc(x.note)}</p><a href="#/deck/${x.ids.join(',')}">→ 組隊重複檢查</a></div>`).join('')}
+<h2>我的隊伍</h2><a class="card row" style="color:inherit" href="#/team">${img(P['main:爆擊']?.img)}<span class="grow"><b>我的配置：最強隊＋戰術替換</b><br><span class="muted">${(D.mine?.teams||[]).map(T=>T.beys.map(b=>b.name).join('、')).join('｜')}</span></span></a><h2>推薦 3CX 隊伍（參考）</h2>${t.map(x=>`<div class="card"><h3>${esc(x.name)} ${tag(x.tag)}</h3>${x.ids.map(i=>comboCard(CMAP[i])).join('')}<p class="muted">${esc(x.note)}</p><a href="#/deck/${x.ids.join(',')}">→ 組隊重複檢查</a></div>`).join('')}
 <h2>快速入口</h2><div class="grid">${[['#/team','我的配置',P['main:爆擊']?.img],['#/mine','我的收藏',P['chip:帝王']?.img],['#/need','還缺什麼',P['main:極變']?.img],['#/combos','全部配置',P['main:爆擊']?.img],['#/guide','爆擊 & 極變',P['main:極變']?.img],['#/ratchets','固鎖應對',P['ratchet:9-60']?.img],['#/spares','原價囤備品',P['assist:W']?.img],['#/parts?own=1','我的零件',P['chip:天馬']?.img],['#/deck','組隊檢查',P['bit:K']?.img],['#/weights','我的秤重',P['assist:W']?.img]].map(a=>`<a class="tile" href="${a[0]}">${img(a[2],'')}<div>${a[1]}</div></a>`).join('')}</div>`}
 function combos(q){const f=q.get('c')||'全部';const gs=['全部',...new Set(CO.map(c=>c.creator))];
  app.innerHTML=`<h1>配置</h1><div class="chips">${gs.map(g=>`<a class="chip ${g===f?'on':''}" href="#/combos?c=${encodeURIComponent(g)}">${esc(g)}</a>`).join('')}</div>`+
@@ -149,7 +149,7 @@ function team(){const t=MI.teams;
   <div class="${ready?'info ok':'warn'}">${ready?'✅ 零件全部到手，可以直接組':'📦 還在等：'+b.slots.filter(s=>s.st!=='A').map(s=>esc(pname(s.id))).join('、')}</div>
   <details><summary><b>怎麼組裝</b></summary><ol>${ASM.map(x=>`<li>${x}</li>`).join('')}</ol><b>這顆的重點</b><ul>${b.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
   <div class="src">${srcs(b.src)}</div></div>`}).join('')).join('')}
- <h2>替代方案</h2>${MI.alts.map(a=>`<div class="card"><b>${esc(a[0])}</b> ${tag(a[2])}<br>${esc(a[1])}</div>`).join('')}
+ <h2>🧰 備品</h2>${MI.alts.map(a=>`<div class="card"><b>${esc(a[0])}</b> ${tag(a[2])}<br>${esc(a[1])}</div>`).join('')}
  <div class="info">規則：同隊零件不可重複（同名異色也算）；帝王、戰神各限 1；不用 G 輔助；EVA 不拆。</div>`}
 function need(){const n=MI.need;
  app.innerHTML=`<h1>還缺什麼</h1><p class="muted">只列你還沒有、也沒在路上的。每個零件只挑一包。</p>
@@ -158,5 +158,5 @@ function need(){const n=MI.need;
  <tr><td colspan="3"><b>合計</b></td><td align="right"><b>NT$${MI.needTotal}</b></td></tr></table></div>
  <h2>用途</h2>${n.map(x=>`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(x.pid)}">${img(P[x.pid]?.img)}<span class="grow"><b>${esc(x.item)}</b><br><span class="muted">${esc(x.use)}</span></span></a>`).join('')}
  <div class="info">${esc(MI.notneed)}</div><p class="muted">價格為台灣原價；隨機包抽不到指定款可找拆售。</p>`}
-IDX.unshift({t:'頁面',h:'#/mine',title:'我的收藏',sub:'依包裝／依零件',img:P['chip:帝王']?.img,k:'我的收藏 收藏 庫存 集運 已有 我買的 collection'},{t:'頁面',h:'#/team',title:'我的配置（1 隊／2 隊）',sub:'零件來源＋組裝',img:P['main:爆擊']?.img,k:'我的配置 隊伍 1隊 2隊 組裝 怎麼組 team deck'},{t:'頁面',h:'#/need',title:'還缺什麼',sub:'NT$'+MI.needTotal,img:P['main:極變']?.img,k:'還缺什麼 缺 購物清單 要買 shopping'});
+IDX.unshift({t:'頁面',h:'#/mine',title:'我的收藏',sub:'依包裝／依零件',img:P['chip:帝王']?.img,k:'我的收藏 收藏 庫存 集運 已有 我買的 collection'},{t:'頁面',h:'#/team',title:'我的配置（最強隊＋戰術替換）',sub:'零件來源＋組裝',img:P['main:爆擊']?.img,k:'我的配置 隊伍 最強隊 戰術替換 組裝 怎麼組 team deck'},{t:'頁面',h:'#/need',title:'還缺什麼',sub:'NT$'+MI.needTotal,img:P['main:極變']?.img,k:'還缺什麼 缺 購物清單 要買 shopping'});
 for(const T of MI.teams)for(const b of T.beys)IDX.push({t:'配置',h:'#/team',title:'我的 '+b.name,sub:T.name,img:P[b.slots[1].id]?.img,k:('我的 '+b.name+' '+T.name).toLowerCase()});
