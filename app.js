@@ -18,8 +18,14 @@ const stars=n=>n?`<span class="stars">${'★'.repeat(n)}${'☆'.repeat(3-n)}</sp
 const comboName=c=>esc(c.name);
 function cimg(c){const m=P[c.slots[1]?.[0]]||P[c.slots[0][0]];return m?.img}
 
+const W=D.weights||[];
+const wd=w=>{const d=+(w.g-w.ref).toFixed(2);return (d>0?'+':'')+d+' g'};
+function wcard(w,link=true){const p=P[w.part];const inner=`${img(p?.img)}<span class="grow"><b>${esc(w.label)}</b>${w.pack?` <span class="muted">${esc(w.pack)}</span>`:''} ${w.tag?tag(w.tag):''}<br>我的 <b>${w.g} g</b>｜參考 ${w.ref} g｜差 <b class="${w.g>=w.ref?'ok':'bad'}">${wd(w)}</b><br><span class="b own">${esc(w.verdict)}</span> <span class="muted">${esc(w.date)}</span><br><span class="muted">${esc(w.note||'')}｜${esc(w.refNote||'')}</span></span>`;return link?`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(w.part)}">${inner}</a>`:`<div class="card row">${inner}</div>`}
+function weights(){const L=[...W].sort((a,b)=>b.date.localeCompare(a.date));app.innerHTML=`<h1>我的秤重紀錄</h1><p class="muted">共 ${L.length} 筆。參考值主要來自 <a href="https://beybase.com/beyblade-part-weights-database/" target="_blank" rel="noopener">BeyBase</a>。重量≠緊度。</p>${L.map(w=>wcard(w)).join('')}`}
 /* ---------- search ---------- */
 const IDX=[];
+IDX.push({t:'頁面',h:'#/weights',title:'我的秤重紀錄',sub:W.length+' 筆',img:P['assist:W']?.img,k:'我的秤重紀錄 秤重 重量 體質 weight '+W.map(w=>w.label+' '+w.pack).join(' ')});
+for(const w of W)IDX.push({t:'秤重',h:'#/part/'+encodeURIComponent(w.part),title:w.label+' '+w.g+'g',sub:w.date+'｜'+w.verdict,img:P[w.part]?.img,k:('秤重 重量 '+w.label+' '+w.pack+' '+pname(w.part)).toLowerCase()});
 for(const c of CO)IDX.push({t:'配置',h:'#/combo/'+c.id,title:c.name,sub:`${c.creator}｜${c.style}`,img:cimg(c),k:(c.name+' '+c.creator+' '+c.group+' '+c.style+' '+(c.orig||'')+' '+c.slots.map(s=>pname(s[0])+' '+(P[s[0]]?.code||'')).join(' ')).toLowerCase()});
 for(const p of Object.values(P))IDX.push({t:'零件',h:'#/part/'+encodeURIComponent(p.id),title:p.name,sub:`${TZ[p.cat]}${p.own?'｜✅已有':p.ord?'｜🛒已下單':''}`,img:p.img,code:p.code.toLowerCase(),k:[p.name,p.code,p.en,p.jp,TZ[p.cat],p.id].join(' ').toLowerCase()});
 for(const k of Object.values(K))IDX.push({t:'包裝',h:'#/pack/'+encodeURIComponent(k.id),title:`${k.id} ${k.name||''}`,sub:(k.beys||[]).map(b=>b.name).join('、').slice(0,60),img:k.img,code:k.id.toLowerCase(),k:[k.id,k.code,k.name,k.en,k.jp,k.aka,...(k.beys||[]).map(b=>b.name+' '+b.combo+' '+b.en)].join(' ').toLowerCase()});
@@ -43,7 +49,7 @@ function comboCard(c){return `<a class="card row" href="#/combo/${c.id}" style="
 function home(){const t=D.teams;app.innerHTML=`<h1>CX 神 總攻略</h1><p class="muted">以阿銘為主、阿土／深藏blue／雪兔／WBO 為輔。點陀螺 → 看每個零件 → 看哪包出、最緊版本、平替、怕什麼。沒有 G 輔助（暫不買），EVA 整組收藏不拆。</p>
 <div class="info">標籤：${tag('阿銘')} 影片/留言親口說 ${tag('chou轉述')} ${tag('阿土')} 其他創作者／賽果 ${tag('推斷')} 沒人實證，先測試 ${tag('查無')}</div>
 <h2>推薦 3CX 隊伍</h2>${t.map(x=>`<div class="card"><h3>${esc(x.name)} ${tag(x.tag)}</h3>${x.ids.map(i=>comboCard(CMAP[i])).join('')}<p class="muted">${esc(x.note)}</p><a href="#/deck/${x.ids.join(',')}">→ 組隊重複檢查</a></div>`).join('')}
-<h2>快速入口</h2><div class="grid">${[['#/combos','全部配置',P['main:爆擊']?.img],['#/guide','爆擊 & 極變',P['main:極變']?.img],['#/ratchets','固鎖應對',P['ratchet:9-60']?.img],['#/spares','原價囤備品',P['assist:W']?.img],['#/parts?own=1','我的零件',P['chip:天馬']?.img],['#/deck','組隊檢查',P['bit:K']?.img]].map(a=>`<a class="tile" href="${a[0]}">${img(a[2],'')}<div>${a[1]}</div></a>`).join('')}</div>`}
+<h2>快速入口</h2><div class="grid">${[['#/combos','全部配置',P['main:爆擊']?.img],['#/guide','爆擊 & 極變',P['main:極變']?.img],['#/ratchets','固鎖應對',P['ratchet:9-60']?.img],['#/spares','原價囤備品',P['assist:W']?.img],['#/parts?own=1','我的零件',P['chip:天馬']?.img],['#/deck','組隊檢查',P['bit:K']?.img],['#/weights','我的秤重',P['assist:W']?.img]].map(a=>`<a class="tile" href="${a[0]}">${img(a[2],'')}<div>${a[1]}</div></a>`).join('')}</div>`}
 function combos(q){const f=q.get('c')||'全部';const gs=['全部',...new Set(CO.map(c=>c.creator))];
  app.innerHTML=`<h1>配置</h1><div class="chips">${gs.map(g=>`<a class="chip ${g===f?'on':''}" href="#/combos?c=${encodeURIComponent(g)}">${esc(g)}</a>`).join('')}</div>`+
  [...new Set(CO.filter(c=>f==='全部'||c.creator===f).map(c=>c.group))].map(g=>`<h2>${esc(g)}</h2>`+CO.filter(c=>c.group===g&&(f==='全部'||c.creator===f)).map(comboCard).join('')).join('')}
@@ -59,7 +65,7 @@ function combo(id){const c=CMAP[id];if(!c)return nf();const parts=c.slots.map(s=
 function part(id){const p=P[id];if(!p)return nf();const used=(p.usedIn||[]).map(i=>CMAP[i]).filter(Boolean);
  const b=p.best;app.innerHTML=`<p class="muted"><a href="#/parts?cat=${p.cat}">${TZ[p.cat]}</a></p>
  ${img(p.img,'hero',p.name)}<h1>${esc(p.name)}</h1><div>${ownb(p)} ${p.spare?`<span class="b t-推斷">備品 ${stars(p.spare)}</span>`:''} ${p.noBuy?'<span class="b no">暫不買</span>':''}</div>
- <dl>${p.en?`<dt>英文</dt><dd>${esc(p.en)}</dd>`:''}${p.jp?`<dt>日文</dt><dd>${esc(p.jp)}</dd>`:''}${p.btype?`<dt>類型</dt><dd>${esc(p.btype)}${p.spin?'｜'+esc(p.spin):''}</dd>`:''}${p.weight?`<dt>重量</dt><dd>${esc(p.weight)}${typeof p.weight==='number'?' g':'（Hub 等級）'}</dd>`:''}${p.shape?`<dt>形狀</dt><dd>${esc(p.shape)}</dd>`:''}</dl>
+ <dl>${p.en?`<dt>英文</dt><dd>${esc(p.en)}</dd>`:''}${p.jp?`<dt>日文</dt><dd>${esc(p.jp)}</dd>`:''}${p.btype?`<dt>類型</dt><dd>${esc(p.btype)}${p.spin?'｜'+esc(p.spin):''}</dd>`:''}${p.weight?`<dt>重量</dt><dd>${esc(p.weight)}${typeof p.weight==='number'?' g':'（Hub 等級）'}</dd>`:''}${p.shape?`<dt>形狀</dt><dd>${esc(p.shape)}</dd>`:''}</dl>${W.filter(w=>w.part===id).length?`<h2>我的秤重</h2>${W.filter(w=>w.part===id).map(w=>wcard(w,false)).join('')}<p><a href="#/weights">→ 全部秤重紀錄</a></p>`:''}
  ${p.desc?`<div class="card muted">${esc(p.desc)}</div>`:''}
  ${b?`<h2>⭐ 評價最好／最緊版本</h2><div class="card">${(()=>{const k=K[packId(b.pack)];return `<div class="row">${img(k?.img)}<span class="grow"><b>${klink(b.pack)}</b> ${tag(b.tag)}<br>${esc(b.why)}</span></div>`})()}<div class="src">${srcs(b.src)}</div></div>`:''}
  ${p.tight?`<h2>緊度</h2><div class="card">${esc(p.tight)}</div>`:''}
@@ -114,7 +120,7 @@ function deck(arg){const cur=(arg||'').split(',').filter(x=>CMAP[x]);while(cur.l
 function sources(){app.innerHTML=`<h1>來源</h1>${Object.values(S).map(s=>`<a class="card row" style="color:inherit" href="${s[1]}" target="_blank" rel="noopener"><span class="grow"><b>${esc(s[0])}</b><br><span class="muted">${esc(s[1])}</span></span></a>`).join('')}<div class="info">資料更新：${D.built}。阿銘＝影片口述或留言親回；chou轉述＝留言找不到原文；推斷＝沒人實證。</div>`}
 function nf(){app.innerHTML='<h1>找不到</h1><a href="#/">回首頁</a>'}
 function route(){const h=location.hash.slice(1)||'/';const[path,qs]=h.split('?');const q=new URLSearchParams(qs||'');const[,a,b]=path.split('/');const id=b&&decodeURIComponent(b);
- ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,deck:()=>deck(id),sources}[a||'']||nf)();
+ ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,weights,deck:()=>deck(id),sources}[a||'']||nf)();
  document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.getAttribute('href')==='#/'+(a||'')||(x.getAttribute('href')==='#/'&&!a)));window.scrollTo(0,0)}
 addEventListener('hashchange',route);route();
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
