@@ -48,7 +48,7 @@ function slotRow(s){const p=P[s[0]];return `<a class="slot" href="#/part/${encod
 function comboCard(c){return `<a class="card row" href="#/combo/${c.id}" style="color:inherit">${img(cimg(c))}<span class="grow"><b>${comboName(c)}</b><br><span class="muted">${esc(c.creator)}｜${esc(c.style)}</span><br>${tag(c.tag)}</span></a>`}
 function home(){const t=D.teams;app.innerHTML=`<h1>CX 神 總攻略</h1><p class="muted">以阿銘為主、阿土／深藏blue／雪兔／WBO 為輔。點陀螺 → 看每個零件 → 看哪包出、最緊版本、平替、怕什麼。G 輔助已購 2 片，EVA 整組收藏不拆。</p>
 <div class="info">標籤：${tag('阿銘')} 影片/留言親口說 ${tag('chou轉述')} ${tag('阿土')} 其他創作者／賽果 ${tag('推斷')} 沒人實證，先測試 ${tag('查無')}</div>
-<h2>我的隊伍</h2><a class="card row" style="color:inherit" href="#/team">${img(P['main:爆擊']?.img)}<span class="grow"><b>我的配置：最強隊＋戰術替換</b><br><span class="muted">${(D.mine?.teams||[]).map(T=>T.beys.map(b=>b.name).join('、')).join('｜')}</span></span></a><h2>推薦 3CX 隊伍（參考）</h2>${t.map(x=>`<div class="card"><h3>${esc(x.name)} ${tag(x.tag)}</h3>${x.ids.map(i=>comboCard(CMAP[i])).join('')}<p class="muted">${esc(x.note)}</p><a href="#/deck/${x.ids.join(',')}">→ 組隊重複檢查</a></div>`).join('')}
+<h2>我的隊伍</h2><a class="card row" style="color:inherit" href="#/team">${img(P['main:爆擊']?.img)}<span class="grow"><b>我的配置：最強隊＋備選</b><br><span class="muted">${(D.mine?.teams||[]).map(T=>T.beys.map(b=>b.name).join('、')).join('｜')}</span></span></a><h2>阿銘 3CX（參考）</h2>${t.map(x=>`<div class="card"><h3>${esc(x.name)} ${tag(x.tag)}</h3>${x.ids.map(i=>comboCard(CMAP[i])).join('')}<p class="muted">${esc(x.note)}</p><a href="#/deck/${x.ids.join(',')}">→ 組隊重複檢查</a></div>`).join('')}
 <h2>快速入口</h2><div class="grid">${[['#/team','我的配置',P['main:爆擊']?.img],['#/mine','我的收藏',P['chip:帝王']?.img],['#/need','還缺什麼',P['main:極變']?.img],['#/combos','全部配置',P['main:爆擊']?.img],['#/guide','爆擊 & 極變',P['main:極變']?.img],['#/ratchets','固鎖應對',P['ratchet:9-60']?.img],['#/spares','原價囤備品',P['assist:W']?.img],['#/parts?own=1','我的零件',P['chip:天馬']?.img],['#/deck','組隊檢查',P['bit:K']?.img],['#/weights','我的秤重',P['assist:W']?.img]].map(a=>`<a class="tile" href="${a[0]}">${img(a[2],'')}<div>${a[1]}</div></a>`).join('')}</div>`}
 function combos(q){const f=q.get('c')||'全部';const gs=['全部',...new Set(CO.map(c=>c.creator))];
  app.innerHTML=`<h1>配置</h1><div class="chips">${gs.map(g=>`<a class="chip ${g===f?'on':''}" href="#/combos?c=${encodeURIComponent(g)}">${esc(g)}</a>`).join('')}</div>`+
@@ -96,7 +96,7 @@ function ratchets(){const L=['9-60','9-70','7-70','6-70','0-70','7-60','3-60','1
  <h2>每個固鎖</h2>${L.map(p=>`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(p.id)}">${img(p.img)}<span class="grow"><b>${esc(p.name)}</b> ${ownb(p)}<br><span class="ok">利：${esc(p.win||'—')}</span>｜<span class="bad">怕：${esc(p.fears||'—')}</span><br><span class="muted">${esc((p.pros||[]).join('；'))}</span></span></a>`).join('')}
  <div class="warn">0-70 可能自爆；7-60 爆 5～6 次換；1-50 會晃。</div>`}
 function guide(){const bars=(a)=>{const m=Math.max(...a.map(x=>x[1]));return a.map(x=>`<div class="row" style="margin:4px 0"><span style="width:56px">${x[0]}</span><span class="grow"><div class="bar2" style="width:${x[1]/m*100}%"></div></span><span class="muted">${x[1]}</span></div>`).join('')};
- app.innerHTML=`<h1>爆擊 & 極變 完全攻略</h1><div class="info">同隊最強：帝王 爆擊 W9-70H ＋ 獨角 極變 P H3-60K，零件全不重複。P 超越刃固定放「平衡」位置。</div>
+ app.innerHTML=`<h1>爆擊 & 極變 完全攻略</h1><div class="info">最強隊：帝王 爆擊 W9-70H ＋ 戰神 極變 P H9-60K，零件全不重複。P 超越刃固定放「平衡」位置。</div>
  ${['main:爆擊','main:極變'].map(id=>{const p=P[id];return `<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(id)}">${img(p.img)}<span class="grow"><b>${p.name}</b> ${ownb(p)}<br><span class="muted">${esc(p.play||'')}</span></span></a>`}).join('')}
  <h2>爆擊 規格</h2><div class="card"><dl><dt>重量</dt><dd>主刃 32.78g（BeyBase）</dd><dt>官方數值</dt><dd>攻 50／防 10／持 15</dd><dt>形狀</dt><dd>三片刃，刃尖往下打 Smash</dd><dt>鬆緊</dt><dd>模號 A1 鬆、A4 緊（Reddit）</dd></dl></div>
  <h3>爆擊 配置</h3>${[['帝王 爆擊 H9-60K','賽果','WBO 14 冠'],['帝王 爆擊 H9-60LR','賽果','WBO 9 冠，K 被極變用掉時首選'],['天馬 爆擊 H3-60K','賽果','WBO 21 次前段'],['帝王 爆擊 W9-70H','阿銘','3CX 冠軍隊'],['戰神 爆擊 W6-70H','阿土','#10 持久重量版'],['爆擊 W＋WB 軸','推斷','wiki 分析，剋神杖/銀狼/天蠍，無賽果']].map(x=>`<div class="card">${esc(x[0])} ${tag(x[1])}<br><span class="muted">${esc(x[2])}</span></div>`).join('')}
@@ -111,7 +111,7 @@ function deck(arg){const cur=(arg||'').split(',').filter(x=>CMAP[x]);while(cur.l
  const opts=v=>`<option value="">— 選配置 —</option>`+CO.map(c=>`<option value="${c.id}" ${c.id===v?'selected':''}>${esc(c.creator)}｜${esc(c.name)}</option>`).join('');
  const used={};cur.filter(Boolean).forEach(i=>CMAP[i].slots.forEach(s=>{const base=s[0].replace(/-.*$/,'').replace(/^(\w+:)(.).*$/,(m,a,b)=>P[s[0]]?.cat==='assist'||P[s[0]]?.cat==='over'?a+P[s[0]].code:m);(used[s[0]]=used[s[0]]||[]).push(CMAP[i].name)}));
  const dup=Object.entries(used).filter(([k,v])=>v.length>1);const metal=['chip:帝王','chip:戰神'];
- app.innerHTML=`<h1>組隊重複檢查</h1><p class="muted">一隊 3 顆，鎖片、主刃、超越刃、輔助刃、固鎖、軸心都不能重複。帝王、戰神各限 1 個（阿銘；網友有異議，看比賽規則）。</p>
+ app.innerHTML=`<h1>組隊重複檢查</h1><p class="muted">3 顆一組，鎖片、主刃、超越刃、輔助刃、固鎖、軸心都不能重複。帝王、戰神各限 1 個（阿銘；網友有異議，看比賽規則）。</p>
  ${cur.map((v,i)=>`<div class="card"><b>第 ${i+1} 顆</b><br><select data-i="${i}" style="width:100%">${opts(v)}</select>${v?`<div class="row" style="margin-top:6px;flex-wrap:wrap">${CMAP[v].slots.map(s=>`<a href="#/part/${encodeURIComponent(s[0])}" class="b ${used[s[0]].length>1?'no':'own'}">${esc(pname(s[0]))}</a>`).join('')}</div>`:''}</div>`).join('')}
  ${cur.filter(Boolean).length?(dup.length?`<div class="warn">⚠️ 重複：${dup.map(([k,v])=>`${plink(k)}（${v.map(esc).join('、')}）`).join('；')}</div>`:'<div class="info ok">✅ 零件全部不重複</div>'):''}
  ${cur.filter(Boolean).flatMap(i=>CMAP[i].slots.map(s=>s[0])).filter(x=>x==='assist:G').length?'<div class="warn">含 G 輔助：chou 目前沒有（暫不買）</div>':''}
@@ -122,7 +122,7 @@ function nf(){app.innerHTML='<h1>找不到</h1><a href="#/">回首頁</a>'}
 function route(){const h=location.hash.slice(1)||'/';const[path,qs]=h.split('?');const q=new URLSearchParams(qs||'');const[,a,b]=path.split('/');const id=b&&decodeURIComponent(b);
  ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,weights,mine:()=>mine(q),team,need,deck:()=>deck(id),sources}[a||'']||nf)();
  document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.getAttribute('href')==='#/'+(a||'')||(x.getAttribute('href')==='#/'&&!a)));window.scrollTo(0,0)}
-addEventListener('hashchange',route);route();
+
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
 /* ---------- 我的收藏 / 我的配置 / 還缺什麼 ---------- */
 const MI=D.mine||{packs:[],parts:{},teams:[],need:[]};
@@ -142,15 +142,20 @@ const ASM=['<b>拆舊零件</b>：先拔軸心 → 固鎖逆時針轉下 → 取
 '<b>固鎖</b>：固鎖的爪對準輔助刃下方的孔，壓緊後順時針轉到卡住。單刃（1-60）可把刃轉到主刃較輕那側調平衡。',
 '<b>軸心</b>：軸心插進固鎖底部轉到卡住。',
 '<b>檢查</b>：拿著輕搖，紋章、輔助刃不能晃；比賽前三顆再對一次零件不重複。'];
-function team(){const t=MI.teams;
- app.innerHTML=`<h1>我的配置</h1><p class="muted">只用你到手＋在路上的零件。每顆標出每個零件從哪包拆。📦＝還在集運。</p>
- ${t.map(T=>`<h2>${esc(T.name)}</h2><p class="muted">${esc(T.note)}</p>`+T.beys.map((b,i)=>{const ready=b.slots.every(s=>s.st==='A');return `<div class="card"><h3>${i+1}. ${esc(b.name)} ${tag(b.tag)}</h3><p class="muted">${esc(b.why)}</p>
-  ${b.slots.map(s=>`<a class="slot" href="#/part/${encodeURIComponent(s.id)}">${img(P[s.id]?.img,'')}<span class="grow"><span class="muted">${TZ[P[s.id]?.cat]||''}</span> <b>${esc(pname(s.id))}</b><br>← ${esc(s.src)} ${stb(s.st)}</span></a>`).join('')}
-  <div class="${ready?'info ok':'warn'}">${ready?'✅ 零件全部到手，可以直接組':'📦 還在等：'+b.slots.filter(s=>s.st!=='A').map(s=>esc(pname(s.id))).join('、')}</div>
-  <details><summary><b>怎麼組裝</b></summary><ol>${ASM.map(x=>`<li>${x}</li>`).join('')}</ol><b>這顆的重點</b><ul>${b.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
-  <div class="src">${srcs(b.src)}</div></div>`}).join('')).join('')}
- <h2>🧰 備品</h2>${MI.alts.map(a=>`<div class="card"><b>${esc(a[0])}</b> ${tag(a[2])}<br>${esc(a[1])}</div>`).join('')}
- <div class="info">規則：同隊零件不可重複（同名異色也算）；帝王、戰神各限 1；不用 G 輔助；EVA 不拆。</div>`}
+const TIERS=[{name:'最強隊',cls:'t1',cards:[
+ {main:'main:爆擊',cap:'CX-07 天馬爆擊',chip:'chip:帝王',o:[['assist:W',1],['ratchet:9-70',1],['ratchet:0-70'],['bit:H',1]],note:'-70 系列都行，挑最緊（阿銘）'},
+ {main:'main:極變',cap:'CX-17 獨角極變',chip:'chip:戰神',o:[['over:P',1],['assist:H',1],['ratchet:9-60',1],['bit:K',1],['bit:Nr']],note:'K 打攻擊｜Nr 打反擊跟持久；戰神到前用獨角'},
+ {main:'main:堡壘',cap:'CX-14 騎士堡壘',chip:'chip:腕龍',o:[['over:T',1],['assist:G',1],['assist:B'],['ratchet:3-60',1],['bit:U',1]],note:'G 壞了先換 G #2，沒了才用 B'}]},
+{name:'備選',cls:'t2',cards:[
+ {main:'main:閃擊',cap:'CX-13 龍王閃擊',chip:'chip:帝王',rep:'換爆擊',o:[['assist:K'],['ratchet:7-60'],['bit:L']],note:'打持久／神杖，全力爆抽（阿銘；K 輔助推斷）'},
+ {main:'main:鞭打',cap:'CX-18 腕龍鞭打',chip:'chip:腕龍',rep:'換堡壘',o:[['over:O'],['assist:G'],['ratchet:2-70'],['bit:LR']],note:'打防禦／持久主動擊飛；怕鯊魚（阿銘；2-70 推斷）'}]}];
+const ico=(id,def)=>{const p=P[id],l=esc(id.split(':')[1]);return `<a class="ti${def?' def':''}" href="#/part/${encodeURIComponent(id)}">${p?.img?`<img src="${p.img}" alt="${l}" loading="lazy">`:`<span class="tx">${l}</span>`}<span>${l}</span></a>`};
+function team(){
+ app.innerHTML=`<h1>我的配置</h1><p class="muted">亮框＝預設零件。點零件看詳情。</p><div class="tier">${TIERS.map(T=>`<div class="band ${T.cls}"><div class="bl">${T.name}</div><div class="bc">${T.cards.map(c=>`<div class="tc"><div class="tb"><a href="#/part/${encodeURIComponent(c.main)}">${P[c.main]?.img?`<img src="${P[c.main].img}" alt="">`:`<span class="tx big">${esc(c.cap)}</span>`}</a><div class="cap">${esc(c.cap)}</div></div><div class="tr">${c.rep?`<span class="rep">${esc(c.rep)}</span>`:''}<div class="tg">${ico(c.chip,!c.rep)}${c.o.map(x=>ico(x[0],x[1])).join('')}</div><div class="tn">${esc(c.note)}</div></div></div>`).join('')}</div></div>`).join('')}</div>
+ <details class="card"><summary><b>🔧 怎麼組裝</b></summary><ol>${ASM.map(x=>`<li>${x}</li>`).join('')}</ol></details>
+ <details class="card"><summary><b>🧰 備品</b></summary>${MI.alts.map(a=>`<div><b>${esc(a[0])}</b> ${tag(a[2])}<br><span class="muted">${esc(a[1])}</span></div>`).join('<hr>')}</details>
+ <details class="card"><summary><b>📦 每個零件從哪包拆</b></summary>${MI.teams.flatMap(T=>T.beys).map(b=>`<p><b>${esc(b.name)}</b><br><span class="muted">${b.slots.map(s=>esc(pname(s.id))+'←'+esc(s.src)).join('；')}</span></p>`).join('')}</details>
+ <p class="muted">規則：同隊零件不重複；帝王、戰神各限 1；EVA 不拆。</p>`}
 function need(){const n=MI.need;
  app.innerHTML=`<h1>還缺什麼</h1><p class="muted">只列你還沒有、也沒在路上的。每個零件只挑一包。</p>
  <div class="card"><table style="width:100%;border-collapse:collapse"><tr><th align="left">項目</th><th>數量</th><th align="right">單價</th><th align="right">小計</th></tr>
@@ -158,5 +163,7 @@ function need(){const n=MI.need;
  <tr><td colspan="3"><b>合計</b></td><td align="right"><b>NT$${MI.needTotal}</b></td></tr></table></div>
  <h2>用途</h2>${n.map(x=>`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(x.pid)}">${img(P[x.pid]?.img)}<span class="grow"><b>${esc(x.item)}</b><br><span class="muted">${esc(x.use)}</span></span></a>`).join('')}
  <div class="info">${esc(MI.notneed)}</div><p class="muted">價格為台灣原價；隨機包抽不到指定款可找拆售。</p>`}
-IDX.unshift({t:'頁面',h:'#/mine',title:'我的收藏',sub:'依包裝／依零件',img:P['chip:帝王']?.img,k:'我的收藏 收藏 庫存 集運 已有 我買的 collection'},{t:'頁面',h:'#/team',title:'我的配置（最強隊＋戰術替換）',sub:'零件來源＋組裝',img:P['main:爆擊']?.img,k:'我的配置 隊伍 最強隊 戰術替換 組裝 怎麼組 team deck'},{t:'頁面',h:'#/need',title:'還缺什麼',sub:'NT$'+MI.needTotal,img:P['main:極變']?.img,k:'還缺什麼 缺 購物清單 要買 shopping'});
+IDX.unshift({t:'頁面',h:'#/mine',title:'我的收藏',sub:'依包裝／依零件',img:P['chip:帝王']?.img,k:'我的收藏 收藏 庫存 集運 已有 我買的 collection'},{t:'頁面',h:'#/team',title:'我的配置（最強隊＋備選）',sub:'零件來源＋組裝',img:P['main:爆擊']?.img,k:'我的配置 隊伍 最強隊 備選 組裝 怎麼組 team deck'},{t:'頁面',h:'#/need',title:'還缺什麼',sub:'NT$'+MI.needTotal,img:P['main:極變']?.img,k:'還缺什麼 缺 購物清單 要買 shopping'});
 for(const T of MI.teams)for(const b of T.beys)IDX.push({t:'配置',h:'#/team',title:'我的 '+b.name,sub:T.name,img:P[b.slots[1].id]?.img,k:('我的 '+b.name+' '+T.name).toLowerCase()});
+
+addEventListener('hashchange',route);route();
