@@ -21,13 +21,13 @@ function cimg(c){const m=P[c.slots[1]?.[0]]||P[c.slots[0][0]];return m?.img}
 const W=D.weights||[];
 const wd=w=>{const d=+(w.g-w.ref).toFixed(2);return (d>0?'+':'')+d+' g'};
 function wcard(w,link=true){const p=P[w.part];const inner=`${img(p?.img)}<span class="grow"><b>${esc(w.label)}</b>${w.pack?` <span class="muted">${esc(w.pack)}</span>`:''} ${w.tag?tag(w.tag):''}<br>我的 <b>${w.g} g</b>｜參考 ${w.ref} g｜差 <b class="${w.g>=w.ref?'ok':'bad'}">${wd(w)}</b><br><span class="b own">${esc(w.verdict)}</span> <span class="muted">${esc(w.date)}</span><br><span class="muted">${esc(w.note||'')}｜${esc(w.refNote||'')}</span></span>`;return link?`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(w.part)}">${inner}</a>`:`<div class="card row">${inner}</div>`}
-function weights(){const L=[...W].sort((a,b)=>b.date.localeCompare(a.date));app.innerHTML=`<h1>我的秤重紀錄</h1><p class="muted">共 ${L.length} 筆。參考值主要來自 <a href="https://beybase.com/beyblade-part-weights-database/" target="_blank" rel="noopener">BeyBase</a>。重量≠緊度。</p>${L.map(w=>wcard(w)).join('')}`}
+function weights(){const L=[...W].sort((a,b)=>b.date.localeCompare(a.date));app.innerHTML=`<h1>我的秤重紀錄</h1><p class="muted">共 ${L.length} 筆。參考重量以 <a href="https://beyblade.phstudy.org/" target="_blank" rel="noopener">beyblade.phstudy.org</a> 為準（±0.2–0.3g）。重量≠緊度。</p>${L.map(w=>wcard(w)).join('')}`}
 /* ---------- search ---------- */
 const IDX=[];
 IDX.push({t:'頁面',h:'#/weights',title:'我的秤重紀錄',sub:W.length+' 筆',img:P['assist:W']?.img,k:'我的秤重紀錄 秤重 重量 體質 weight '+W.map(w=>w.label+' '+w.pack).join(' ')});
 for(const w of W)IDX.push({t:'秤重',h:'#/part/'+encodeURIComponent(w.part),title:w.label+' '+w.g+'g',sub:w.date+'｜'+w.verdict,img:P[w.part]?.img,k:('秤重 重量 '+w.label+' '+w.pack+' '+pname(w.part)).toLowerCase()});
 for(const c of CO)IDX.push({t:'配置',h:'#/combo/'+c.id,title:c.name,sub:`${c.creator}｜${c.style}`,img:cimg(c),k:(c.name+' '+c.creator+' '+c.group+' '+c.style+' '+(c.orig||'')+' '+c.slots.map(s=>pname(s[0])+' '+(P[s[0]]?.code||'')).join(' ')).toLowerCase()});
-for(const p of Object.values(P))IDX.push({t:'零件',h:'#/part/'+encodeURIComponent(p.id),title:p.name,sub:`${TZ[p.cat]}${p.own?'｜✅已有':p.ord?'｜📦路上':''}`,img:p.img,code:p.code.toLowerCase(),k:[p.name,p.code,p.en,p.jp,TZ[p.cat],p.id].join(' ').toLowerCase()});
+for(const p of Object.values(P)){const sp=p.spec||{},vs=(sp.variants||[]).map(v=>[v.name,v.set,v.color,v.id].join(' ')).join(' ');const hb=(sp.hasbro||[]).map(h=>[h.name,h.set,h.en].join(' ')).join(' ');IDX.push({t:'零件',h:'#/part/'+encodeURIComponent(p.id),title:p.name,sub:`${TZ[p.cat]}${p.official_g!=null?'｜'+p.official_g+'g':''}${p.own?'｜✅已有':p.ord?'｜📦路上':''}`,img:p.img,code:String(p.code||'').toLowerCase(),k:[p.name,p.code,p.en,p.jp,TZ[p.cat],p.id,sp.gid,vs,hb].join(' ').toLowerCase()});}
 for(const k of Object.values(K))IDX.push({t:'包裝',h:'#/pack/'+encodeURIComponent(k.id),title:`${k.id} ${k.name||''}`,sub:(k.beys||[]).map(b=>b.name).join('、').slice(0,60),img:k.img,code:k.id.toLowerCase(),k:[k.id,k.code,k.name,k.en,k.jp,k.aka,...(k.beys||[]).map(b=>b.name+' '+b.combo+' '+b.en)].join(' ').toLowerCase()});
 function search(q){q=q.trim().toLowerCase();if(!q)return[];
   const v=q.replace(/-\d\d$/,'');const terms=q.split(/\s+/);
@@ -63,25 +63,49 @@ function combo(id){const c=CMAP[id];if(!c)return nf();const parts=c.slots.map(s=
  <h2>組裝步驟</h2><div class="card"><ol>${c.slots.map(s=>{const p=P[s[0]];return `<li>${TZ[p?.cat]}：${plink(s[0])} ← ${p?.best?klink(p.best.pack):(p?.packs?.[0]?klink(p.packs[0].pack):'查無')}</li>`}).join('')}<li>鎖片 → 主刃 →（超越刃）→ 輔助刃 對齊缺口，用軸心當扳手轉到「喀」。上蓋要緊不能晃（阿銘）。</li><li>配好就不拆，常拆會磨鬆卡榫。</li></ol></div>
  <h2>來源</h2><div class="src">${srcs(c.src)||'—'}</div><p><a href="#/deck/${id}">→ 放進組隊檢查</a></p>`}
 function part(id){const p=P[id];if(!p)return nf();const used=(p.usedIn||[]).map(i=>CMAP[i]).filter(Boolean);
- const b=p.best;app.innerHTML=`<p class="muted"><a href="#/parts?cat=${p.cat}">${TZ[p.cat]}</a></p>
- ${img(p.img,'hero',p.name)}<h1>${esc(p.name)}</h1><div>${ownb(p)} ${p.spare?`<span class="b t-推斷">備品 ${stars(p.spare)}</span>`:''} ${p.noBuy?'<span class="b no">暫不買</span>':''}</div>
- <dl>${p.en?`<dt>英文</dt><dd>${esc(p.en)}</dd>`:''}${p.jp?`<dt>日文</dt><dd>${esc(p.jp)}</dd>`:''}${p.btype?`<dt>類型</dt><dd>${esc(p.btype)}${p.spin?'｜'+esc(p.spin):''}</dd>`:''}${p.weight?`<dt>重量</dt><dd>${esc(p.weight)}${typeof p.weight==='number'?' g':'（Hub 等級）'}</dd>`:''}${p.shape?`<dt>形狀</dt><dd>${esc(p.shape)}</dd>`:''}</dl>${W.filter(w=>w.part===id).length?`<h2>我的秤重</h2>${W.filter(w=>w.part===id).map(w=>wcard(w,false)).join('')}<p><a href="#/weights">→ 全部秤重紀錄</a></p>`:''}
+ const b=p.best;const sp=p.spec||{};const st=sp.stats||null;
+ const statRow=(lab,val,cls)=>{if(val==null||val==='')return'';return `<div class="stat"><span class="sl">${lab}</span><span class="sv ${cls||''}">${val}</span><span class="sbar"><i style="width:${Math.min(100,Number(val)||0)}%"></i></span></div>`};
+ const specCard=()=>{
+  const rows=[];
+  const og=p.official_g??sp.official_g;
+  if(og!=null)rows.push(`<div class="sr2"><span>官方重量</span><b>${og} g</b></div>`);
+  if(p.weight!=null&&typeof p.weight!=='number')rows.push(`<div class="sr2"><span>Hub 等級</span><b>${esc(p.weight)}</b></div>`);
+  if(sp.gear!=null)rows.push(`<div class="sr2"><span>齒數</span><b>${sp.gear}</b></div>`);
+  if(sp.total_h!=null)rows.push(`<div class="sr2"><span>全高</span><b>${sp.total_h} mm</b></div>`);
+  if(sp.exposed_h!=null)rows.push(`<div class="sr2"><span>露出高度</span><b>${sp.exposed_h} mm</b></div>`);
+  if(sp.height_mm!=null)rows.push(`<div class="sr2"><span>高度</span><b>${sp.height_mm} mm</b></div>`);
+  if(sp.size)rows.push(`<div class="sr2"><span>尺寸</span><b>${esc(sp.size)}</b></div>`);
+  if(p.release||sp.release)rows.push(`<div class="sr2"><span>發售日</span><b>${esc(p.release||sp.release)}</b></div>`);
+  const hb=(sp.hasbro||[]).map(h=>h.set||h.name).filter(Boolean);
+  if(hb.length)rows.push(`<div class="sr2"><span>Hasbro</span><b>${esc(hb.slice(0,3).join('、'))}</b></div>`);
+  const statsHtml=st?`<div class="stats">${statRow('攻',st.atk,'c-atk')}${statRow('防',st.def,'c-def')}${statRow('持',st.sta,'c-sta')}${statRow('速',st.dash,'c-dash')}${st.burst?statRow('爆',st.burst,'c-burst'):''}</div>`:'';
+  if(!rows.length&&!statsHtml)return'';
+  return `<div class="speccard"><div class="spechead"><b>規格</b><a class="speclink" href="https://beyblade.phstudy.org/" target="_blank" rel="noopener">規格資料來源：beyblade.phstudy.org</a></div>${statsHtml}${rows.length?`<div class="specgrid">${rows.join('')}</div>`:''}</div>`};
+ const variants=(sp.variants||[]);
+ const varHtml=variants.length?`<h2>同款零件（${variants.length}）</h2><div class="vchips">${variants.map(v=>`<span class="vchip" title="${esc(v.id)}"><b>${esc((v.set||'')+' '+(v.name||'')).trim()}</b>${v.color?`<small>${esc(v.color)}</small>`:''}${v.weight!=null?`<small>${v.weight}g</small>`:''}</span>`).join('')}</div>`:'';
+ app.innerHTML=`<p class="muted"><a href="#/parts?cat=${p.cat}">${TZ[p.cat]}</a></p>
+ <div class="parthero">${img(p.img,'hero',p.name)}${!p.img?'<p class="muted" style="text-align:center;margin-top:6px">無 BeybladeHub 圖片（不另代圖）</p>':''}</div>
+ <h1>${esc(p.name)}</h1><div>${ownb(p)} ${p.spare?`<span class="b t-推斷">備品 ${stars(p.spare)}</span>`:''} ${p.noBuy?'<span class="b no">暫不買</span>':''}</div>
+ <dl>${p.en?`<dt>英文</dt><dd>${esc(p.en)}</dd>`:''}${p.jp?`<dt>日文</dt><dd>${esc(p.jp)}</dd>`:''}${p.btype?`<dt>類型</dt><dd>${esc(p.btype)}${p.spin?'｜'+esc(p.spin):''}</dd>`:''}${p.shape?`<dt>形狀</dt><dd>${esc(p.shape)}</dd>`:''}</dl>
+ ${specCard()}
+ ${W.filter(w=>w.part===id).length?`<h2>我的秤重</h2>${W.filter(w=>w.part===id).map(w=>wcard(w,false)).join('')}<p><a href="#/weights">→ 全部秤重紀錄</a></p>`:''}
  ${p.desc?`<div class="card muted">${esc(p.desc)}</div>`:''}
  ${b?`<h2>⭐ 評價最好／最緊版本</h2><div class="card">${(()=>{const k=K[packId(b.pack)];return `<div class="row">${img(k?.img)}<span class="grow"><b>${klink(b.pack)}</b> ${tag(b.tag)}<br>${esc(b.why)}</span></div>`})()}<div class="src">${srcs(b.src)}</div></div>`:''}
  ${p.tight?`<h2>緊度</h2><div class="card">${esc(p.tight)}</div>`:''}
+ ${varHtml}
  <h2>💰 平替／替代</h2>${p.alts&&p.alts.length?p.alts.map(a=>`<div class="card row">${img(P[a.id]?.img)}<span class="grow">${plink(a.id)} ${tag(a.tag)}<br><span class="muted">${esc(a.note)}</span><div class="src">${srcs(a.src)}</div></span></div>`).join(''):'<div class="card muted">沒有阿銘／阿土給過的替代（查無）。更便宜的拿法看下面「哪些包有」挑你已有或便宜的包（推斷）。</div>'}
  ${(p.pros||p.cons)?`<div class="card"><b class="ok">優勢</b><ul class="pros">${(p.pros||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>查無</li>'}</ul><b class="bad">缺點</b><ul class="cons">${(p.cons||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>查無</li>'}</ul></div>`:''}
  ${p.win||p.fears?`<div class="card"><dl><dt>有利</dt><dd>${esc(p.win||'查無')}</dd><dt>怕</dt><dd class="bad">${esc(p.fears||'查無')}</dd>${p.atu?`<dt>阿土出處</dt><dd>${esc(p.atu)}（A＝#10、B＝0~9 固鎖解析、C＝4月天梯）</dd>`:''}</dl></div>`:''}
  ${p.play?`<h2>打法</h2><div class="card">${esc(p.play)}</div>`:''}${p.spareWhy?`<div class="warn">備品：${esc(p.spareWhy)}</div>`:''}${p.comp?`<div class="card muted">賽場：${esc(p.comp)}</div>`:''}
  <h2>用在哪些配置（${used.length}）</h2>${used.map(comboCard).join('')||'<p class="muted">資料庫配置未使用</p>'}
- <h2>哪些包有（${p.packs.length}）</h2>${p.packs.map(f=>{const k=K[f.pack];return `<a class="card row" style="color:inherit" href="#/pack/${encodeURIComponent(f.pack)}">${img(k?.img)}<span class="grow"><b>${esc(f.pack)} ${esc(f.pname||k?.name||'')}</b> ${k?.own?'<span class="b own">✅</span>':''}${k?.ord?'<span class="b ord">🛒</span>':''}<br><span class="muted">${esc(f.bey||'')}${f.rare?'｜稀有':''}${f.color?'｜'+esc(f.color):''}${f.twd?'｜NT$'+f.twd:''}${f.jpy?'｜¥'+f.jpy:''}</span></span></a>`}).join('')||'<p class="muted">查無</p>'}`}
+ <h2>哪些包有（${(p.packs||[]).length}）</h2>${(p.packs||[]).map(f=>{const k=K[f.pack];return `<a class="card row" style="color:inherit" href="#/pack/${encodeURIComponent(f.pack)}">${img(k?.img)}<span class="grow"><b>${esc(f.pack)} ${esc(f.pname||k?.name||'')}</b> ${k?.own?'<span class="b own">✅</span>':''}${k?.ord?'<span class="b ord">🛒</span>':''}<br><span class="muted">${esc(f.bey||'')}${f.rare?'｜稀有':''}${f.color?'｜'+esc(f.color):''}${f.twd?'｜NT$'+f.twd:''}${f.jpy?'｜¥'+f.jpy:''}</span></span></a>`}).join('')||'<p class="muted">查無</p>'}`}
 function parts(q){const cat=q.get('cat')||'chip',o=q.get('own');const cats=Object.keys(TZ);
  let L=Object.values(P).filter(p=>p.cat===cat&&(!o||p.own||p.ord));L.sort((a,b)=>(!!b.best-!!a.best)||((b.own||0)+(b.ord||0))-((a.own||0)+(a.ord||0)));
  app.innerHTML=`<h1>零件</h1><div class="chips">${cats.map(c=>`<a class="chip ${c===cat?'on':''}" href="#/parts?cat=${c}${o?'&own=1':''}">${TZ[c]}</a>`).join('')}<a class="chip ${o?'on':''}" href="#/parts?cat=${cat}${o?'':'&own=1'}">只看我有的</a></div>
  <div class="grid">${L.map(p=>`<a class="tile" href="#/part/${encodeURIComponent(p.id)}">${img(p.img,'')}<div>${esc(p.name)}</div>${p.own?'<span class="b own">✅'+p.own+'</span>':''}${p.ord?'<span class="b ord">🛒'+p.ord+'</span>':''}${p.best?'<span class="b t-阿銘">攻略</span>':''}</a>`).join('')}</div>`}
 function packs(q){const f=q.get('l')||'CX';const L=Object.values(K).filter(k=>f==='我的'?(k.own||k.ord):k.id.startsWith(f));
  app.innerHTML=`<h1>包裝</h1><div class="chips">${['CX','UX','BX','我的'].map(x=>`<a class="chip ${x===f?'on':''}" href="#/packs?l=${x}">${x}</a>`).join('')}</div><div class="grid">${L.map(k=>`<a class="tile" href="#/pack/${encodeURIComponent(k.id)}">${img(k.img,'')}<div>${esc(k.id)}</div><span class="muted">${esc(k.name||'')}</span><br>${k.own?'<span class="b own">✅'+k.own+'</span>':''}${k.ord?'<span class="b ord">🛒'+k.ord+'</span>':''}</a>`).join('')}</div>`}
-function pack(id){const k=K[id];if(!k)return nf();const inP=Object.values(P).filter(p=>p.packs.some(f=>f.pack===id));
+function pack(id){const k=K[id];if(!k)return nf();const inP=Object.values(P).filter(p=>(p.packs||[]).some(f=>f.pack===id));
  app.innerHTML=`<p class="muted"><a href="#/packs">包裝</a></p>${img(k.img,'hero',k.name)}<h1>${esc(k.id)} ${esc(k.name||'')}</h1><div>${k.own?`<span class="b own">✅ 已有 ×${k.own}${k.ownv.length?'（'+k.ownv.join('、')+'）':''}</span>`:''}${k.ord?`<span class="b ord">📦 路上 ×${k.ord}${k.ordv.length?'（'+k.ordv.join('、')+'）':''}</span>`:''}</div>
  <dl>${k.en?`<dt>英文</dt><dd>${esc(k.en)}</dd>`:''}${k.jp?`<dt>日文</dt><dd>${esc(k.jp)}</dd>`:''}${k.aka?`<dt>別名</dt><dd>${esc(k.aka)}</dd>`:''}<dt>日本發售</dt><dd>${esc(k.date||'—')}</dd><dt>價格</dt><dd>${k.twd?'NT$'+k.twd:'台灣價未確認'}${k.jpy?'｜¥'+k.jpy:''}</dd></dl>
  ${k.desc?`<div class="card muted">${esc(k.desc)}</div>`:''}<h2>內容</h2>${(k.beys||[]).map((b,i)=>`<div class="card"><b>#${String(i+1).padStart(2,'0')} ${esc(b.name)}</b><br><span class="muted">${esc(b.combo||'')}</span></div>`).join('')}

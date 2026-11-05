@@ -54,3 +54,31 @@ select,button{background:#141b2e;color:#fff;border:1px solid #2a3558;border-radi
 .rep{display:inline-block;font-size:11px;background:#ff8a3d;color:#000;border-radius:4px;padding:0 4px;margin-bottom:3px}
 .tn{font-size:12px;color:#cbb6e6;margin-top:4px}
 body{overflow-x:hidden}
+
+/* —— 規格卡（自家深色風格） —— */
+.parthero{margin:4px 0 8px}
+.speccard{background:linear-gradient(165deg,#182238 0%,#10182c 60%,#0e1526 100%);border:1px solid #2a3a62;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 8px 28px #0005}
+.spechead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:10px}
+.spechead b{font-size:15px;letter-spacing:.5px}
+.speclink{font-size:11px;color:#8ab4ff;opacity:.9}
+.stats{display:flex;flex-direction:column;gap:6px;margin:4px 0 12px}
+.stat{display:grid;grid-template-columns:28px 36px 1fr;gap:8px;align-items:center}
+.stat .sl{font-size:12px;color:#9aa6c8;font-weight:700}
+.stat .sv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+.stat .sbar{height:8px;background:#0b1020;border-radius:99px;overflow:hidden;border:1px solid #243152}
+.stat .sbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5b8cff,#ff4d6d)}
+.c-atk{color:#ff6b7a}.c-def{color:#5ee39a}.c-sta{color:#ffbf47}.c-dash{color:#7cc4ff}.c-burst{color:#c9a6ff}
+.stat:has(.c-atk) .sbar i{background:linear-gradient(90deg,#ff4d6d,#ff8da1)}
+.stat:has(.c-def) .sbar i{background:linear-gradient(90deg,#2bb673,#5ee39a)}
+.stat:has(.c-sta) .sbar i{background:linear-gradient(90deg,#d49a1a,#ffbf47)}
+.stat:has(.c-dash) .sbar i{background:linear-gradient(90deg,#3a8fd6,#7cc4ff)}
+.stat:has(.c-burst) .sbar i{background:linear-gradient(90deg,#7c5cff,#c9a6ff)}
+.specgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sr2{background:#0c1222;border:1px solid #243152;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.sr2 span{font-size:11px;color:#8a94b8;font-weight:600}
+.sr2 b{font-size:15px;font-weight:800;overflow-wrap:anywhere}
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.vchip{display:inline-flex;flex-direction:column;gap:1px;padding:6px 10px;border-radius:12px;background:#141e36;border:1px solid #2c3c66;font-size:12px;max-width:100%}
+.vchip b{font-size:12px;font-weight:700;overflow-wrap:anywhere}
+.vchip small{color:#8a94b8;font-size:11px}
+@media(max-width:420px){.specgrid{grid-template-columns:1fr}}
