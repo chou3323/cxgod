@@ -20,12 +20,12 @@ function cimg(c){const m=P[c.slots[1]?.[0]]||P[c.slots[0][0]];return m?.img}
 
 const W=D.weights||[];
 const wd=w=>{const d=+(w.g-w.ref).toFixed(2);return (d>0?'+':'')+d+' g'};
-function wcard(w,link=true){const p=P[w.part];const inner=`${img(p?.img)}<span class="grow"><b>${esc(w.label)}</b>${w.pack?` <span class="muted">${esc(w.pack)}</span>`:''} ${w.tag?tag(w.tag):''}<br>我的 <b>${w.g} g</b>｜參考 ${w.ref} g｜差 <b class="${w.g>=w.ref?'ok':'bad'}">${wd(w)}</b><br><span class="b own">${esc(w.verdict)}</span> <span class="muted">${esc(w.date)}</span><br><span class="muted">${esc(w.note||'')}｜${esc(w.refNote||'')}</span></span>`;return link?`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(w.part)}">${inner}</a>`:`<div class="card row">${inner}</div>`}
+function wcard(w,link=true){const p=P[w.part];const inner=`${img(p?.img)}<span class="grow"><b>${esc(w.label)}</b>${w.pack?` <span class="muted">${esc(w.pack)}</span>`:''} ${w.tag?tag(w.tag):''}<br>${w.g==null?`我的 <b>未秤</b>｜參考 ${w.ref} g`:`我的 <b>${w.g} g</b>｜參考 ${w.ref} g｜差 <b class="${w.g>=w.ref?'ok':'bad'}">${wd(w)}</b>`}<br><span class="b own">${esc(w.verdict)}</span> <span class="muted">${esc(w.date)}</span><br><span class="muted">${esc(w.note||'')}｜${esc(w.refNote||'')}</span></span>`;return link?`<a class="card row" style="color:inherit" href="#/part/${encodeURIComponent(w.part)}">${inner}</a>`:`<div class="card row">${inner}</div>`}
 function weights(){const L=[...W].sort((a,b)=>b.date.localeCompare(a.date));app.innerHTML=`<h1>我的秤重紀錄</h1><p class="muted">共 ${L.length} 筆。參考重量以 <a href="https://beyblade.phstudy.org/" target="_blank" rel="noopener">beyblade.phstudy.org</a> 為準（±0.2–0.3g）。重量≠緊度。</p>${L.map(w=>wcard(w)).join('')}`}
 /* ---------- search ---------- */
 const IDX=[];
 IDX.push({t:'頁面',h:'#/weights',title:'我的秤重紀錄',sub:W.length+' 筆',img:P['assist:W']?.img,k:'我的秤重紀錄 秤重 重量 體質 weight '+W.map(w=>w.label+' '+w.pack).join(' ')});
-for(const w of W)IDX.push({t:'秤重',h:'#/part/'+encodeURIComponent(w.part),title:w.label+' '+w.g+'g',sub:w.date+'｜'+w.verdict,img:P[w.part]?.img,k:('秤重 重量 '+w.label+' '+w.pack+' '+pname(w.part)).toLowerCase()});
+for(const w of W)IDX.push({t:'秤重',h:'#/part/'+encodeURIComponent(w.part),title:w.label+' '+(w.g==null?'未秤':w.g+'g'),sub:w.date+'｜'+w.verdict,img:P[w.part]?.img,k:('秤重 重量 '+w.label+' '+w.pack+' '+pname(w.part)).toLowerCase()});
 for(const c of CO)IDX.push({t:'配置',h:'#/combo/'+c.id,title:c.name,sub:`${c.creator}｜${c.style}`,img:cimg(c),k:(c.name+' '+c.creator+' '+c.group+' '+c.style+' '+(c.orig||'')+' '+c.slots.map(s=>pname(s[0])+' '+(P[s[0]]?.code||'')).join(' ')).toLowerCase()});
 for(const p of Object.values(P)){const sp=p.spec||{},vs=(sp.variants||[]).map(v=>[v.name,v.set,v.color,v.id].join(' ')).join(' ');const hb=(sp.hasbro||[]).map(h=>[h.name,h.set,h.en].join(' ')).join(' ');IDX.push({t:'零件',h:'#/part/'+encodeURIComponent(p.id),title:p.name,sub:`${TZ[p.cat]}${p.official_g!=null?'｜'+p.official_g+'g':''}${p.own?'｜✅已有':p.ord?'｜📦路上':''}`,img:p.img,code:String(p.code||'').toLowerCase(),k:[p.name,p.code,p.en,p.jp,TZ[p.cat],p.id,sp.gid,vs,hb].join(' ').toLowerCase()});}
 for(const k of Object.values(K))IDX.push({t:'包裝',h:'#/pack/'+encodeURIComponent(k.id),title:`${k.id} ${k.name||''}`,sub:(k.beys||[]).map(b=>b.name).join('、').slice(0,60),img:k.img,code:k.id.toLowerCase(),k:[k.id,k.code,k.name,k.en,k.jp,k.aka,...(k.beys||[]).map(b=>b.name+' '+b.combo+' '+b.en)].join(' ').toLowerCase()});
@@ -145,7 +145,7 @@ function sources(){app.innerHTML=`<h1>來源</h1>${Object.values(S).map(s=>`<a c
 function nf(){app.innerHTML='<h1>找不到</h1><a href="#/">回首頁</a>'}
 function route(){const h=location.hash.slice(1)||'/';const[path,qs]=h.split('?');const q=new URLSearchParams(qs||'');const[,a,b]=path.split('/');const id=b&&decodeURIComponent(b);
  ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,weights,mine:()=>mine(q),team,need,deck:()=>deck(id),sources}[a||'']||nf)();
- document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.getAttribute('href')==='#/'+(a||'')||(x.getAttribute('href')==='#/'&&!a)));window.scrollTo(0,0)}
+ document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.getAttribute('href')==='#/'+(a||'')||(x.getAttribute('href')==='#/'&&!a)));{const n=document.querySelector('#nav a.on');if(n)n.scrollIntoView({inline:'center',block:'nearest'})}window.scrollTo(0,0)}
 
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
 /* ---------- 我的收藏 / 我的配置 / 還缺什麼 ---------- */
