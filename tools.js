@@ -2,7 +2,7 @@
 const WR=(D.wr||{}).parts||{},WRS=(D.wr||{}).sources||{};
 const LS={get(k,d){try{return JSON.parse(localStorage.getItem('cx_'+k))??d}catch(e){return d}},set(k,v){localStorage.setItem('cx_'+k,JSON.stringify(v))}};
 const f2=x=>x==null?'—':(+x).toFixed(2).replace(/0$/,'');
-const LV={'多樣本':'lv-ok','樣本不足':'lv-mid','僅參考值':'lv-ref','無資料':'lv-no'};
+const LV={'多樣本':'lv-ok','樣本不足':'lv-mid','推斷合計':'lv-mid','僅參考值':'lv-ref','無資料':'lv-no'};
 const wtyp=id=>{const r=WR[id];if(!r||r.min==null)return P[id]?.spec?.official_g??null;return r.med};
 /* inventory: {pid:{q:n,w:[g..]}} seeded from build-time ownership */
 function INV(){let v=LS.get('inv',null);if(!v){v={};for(const p of Object.values(P))if(p.own)v[p.id]={q:p.own,w:[]};for(const w of W)if(w.g!=null&&P[w.part]){(v[w.part]=v[w.part]||{q:1,w:[]}).w.push(w.g)}LS.set('inv',v)}return v}
@@ -22,17 +22,28 @@ function rangeCard(id,compact){const r=WR[id];const mine=myW(id);
  <div class="wax"><span>${f2(a)}g</span><span>${f2(b)}g</span></div>
  <div class="wlg"><span><i class="lg typ"></i>一般</span><span><i class="lg top"></i>頂重</span><span><i class="lg ref"></i>參考 ${f2(r.ref)}g</span>${mine.length?'<span><i class="lg me"></i>我的</span>':''}</div>
  ${mine.length?`<div class="wme">${mine.map(g=>`我的 <b>${g}g</b> → <b class="${posOf(r,g)==='偏輕'?'bad':posOf(r,g)==='頂重'?'ok':''}">${posOf(r,g)}</b>`).join('｜')}</div>`:''}
- ${r.level!=='多樣本'?'<p class="muted" style="margin:6px 0 0">樣本少，範圍僅供參考（推斷）。</p>':''}
+ ${r.note?`<p class="muted" style="margin:6px 0 0">${esc(r.note)}</p>`:r.level!=='多樣本'?'<p class="muted" style="margin:6px 0 0">樣本少，範圍僅供參考（推斷）。</p>':''}
  <details><summary>全部 ${r.n} 筆實測</summary><div class="wsl">${(r.samples||[]).map(s=>`<div><b>${s.g}</b> <span class="muted">${esc(s.note)}</span></div>`).join('')||'<span class="muted">只有資料庫參考值</span>'}</div></details>
  <div class="src">來源：${srcs.join('、')||'phstudy 參考值'}</div></div>`}
 /* part page: insert range card */
-const _part=part;part=function(id){_part(id);const p=P[id];if(!p)return;const sc=app.querySelector('.speccard')||app.querySelector('dl');const h=document.createElement('div');h.innerHTML=rangeCard(id)+invCtl(id);(sc?sc.after(...h.childNodes):app.prepend(...h.childNodes));bindInv()};
+const _part=part;part=function(id){_part(id);const p=P[id];if(!p)return;const sc=app.querySelector('.speccard')||app.querySelector('dl');const h=document.createElement('div');h.innerHTML=rangeCard(id)+invCtl(id);app.insertAdjacentHTML('beforeend',packTable(p)+srcPanel(p));(sc?sc.after(...h.childNodes):app.prepend(...h.childNodes));bindInv()};
 function invCtl(id){const v=INV()[id]||{q:0,w:[]};return `<div class="invc" data-id="${esc(id)}"><b>我的倉庫</b><span class="step"><button data-a="-">−</button><b>${v.q}</b><button data-a="+">＋</button></span><input type="number" step="0.01" inputmode="decimal" placeholder="新增秤重 g"><button data-a="w">記錄</button></div>`}
 function bindInv(){app.querySelectorAll('.invc').forEach(el=>{const id=el.dataset.id;el.onclick=e=>{const a=e.target.dataset.a;if(!a)return;const v=INV();const r=v[id]||{q:0,w:[]};if(a==='+')r.q++;if(a==='-')r.q=Math.max(0,r.q-1);if(a==='w'){const g=parseFloat(el.querySelector('input').value);if(!(g>0))return;r.w.push(g)}if(a==='x'){r.w.splice(+e.target.dataset.i,1)}v[id]=r;LS.set('inv',v);route()}})}
+function packTable(p){const L=p.plist||[];if(!L.length)return `<h2>收錄包裝</h2><div class="card muted">無資料</div>`;
+ const tt=L.filter(r=>!r.brand.startsWith('Hasbro')),hb=L.filter(r=>r.brand.startsWith('Hasbro'));
+ const row=r=>`<tr><td>${r.kid?`<a href="#/pack/${encodeURIComponent(r.kid)}">${esc(r.code)}</a>`:esc(r.code)}</td><td>${esc(r.name||'')}${r.color?` <small class="muted">${esc(r.color)}</small>`:''}${r.price?` <small class="muted">${esc(r.price)}</small>`:''}</td><td>${esc(r.release||'—')}</td><td>${r.w!=null?r.w:'—'}</td></tr>`;
+ return `<h2>收錄包裝（${L.length}）</h2><div class="ptab"><table><tr><th>包號</th><th>商品／版本</th><th>發售</th><th>g</th></tr>${tt.map(row).join('')}${hb.length?`<tr><td colspan="4" class="muted"><b>Hasbro（歐美版）${hb.length}</b></td></tr>`+hb.map(row).join(''):''}</table></div><p class="muted" style="font-size:12px">包裝清單：beyblade.phstudy.org（日版、Hasbro）＋ BeybladeHub；g 為 phstudy 參考值。</p>`}
+function srcPanel(p){const r=WR[p.id]||{};const sp=p.spec||{};const f=(k,v,u)=>`<div class="sr2"><span>${k}</span><b>${u?`<a href="${u}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v)}</b></div>`;
+ return `<h2>資料來源</h2><div class="specgrid">${f('攻防持數值',sp.stats?'phstudy（官方）':'無資料',sp.stats?'https://beyblade.phstudy.org/':'')}${f('規格／高度／齒數',sp.gid?'phstudy':'無資料',sp.gid?'https://beyblade.phstudy.org/':'')}${f('包裝清單',(p.plist||[]).length?'phstudy＋BeybladeHub':'無資料','https://beyblade.phstudy.org/')}${f('重量範圍',r.level||'無資料','')}${f('圖片／類型',p.img?'BeybladeHub':'無圖','https://beybladehub.app/')}${f('緊度／優缺點',p.tight||p.pros?'CX神 整理（見各段來源）':'無資料','')}</div>`}
+/* pack page: add parts listed by phstudy */
+const _pack=pack;pack=function(id){_pack(id);if(!K[id])return;const L=Object.values(P).filter(p=>(p.plist||[]).some(r=>r.kid===id));if(L.length)app.insertAdjacentHTML('beforeend',`<h2>這包的零件（phstudy，${L.length}）</h2><div class="plist">${L.map(p=>`<a class="prow" href="#/part/${encodeURIComponent(p.id)}">${img(p.img,'pth','')}<span class="grow"><b>${esc(p.name)}</b> <span class="muted">${TZ[p.cat]}</span><br>${rangeCard(p.id,1)}</span></a>`).join('')}</div>`)};
+/* ownership follows 倉庫 */
+for(const p of Object.values(P)){const q=(INV()[p.id]||{}).q;if(q!=null)p.own=q;else if(p.own)p.own=0}
+const _need=need;need=function(){_need();const own=Object.values(MI.need||[]).filter(x=>invQ(x.pid)>0);if(own.length)app.insertAdjacentHTML('afterbegin',`<div class="warn">倉庫已記錄你有：${own.map(x=>esc(x.item)).join('、')}（以倉庫為準，可以不用再買）</div>`)};
 /* 全圖鑑 */
 parts=function(q){const cat=q.get('cat')||'all',o=q.get('own'),s=q.get('s')||'def',t=(q.get('t')||'').toLowerCase(),lv=q.get('lv')||'',pk=q.get('pk')||'';
  const set=(k,v)=>{const n=new URLSearchParams(q);v?n.set(k,v):n.delete(k);return '#/parts?'+n};
- let L=Object.values(P).filter(p=>(cat==='all'||p.cat===cat)&&(!o||invQ(p.id)>0)&&(!lv||WR[p.id]?.level===lv)&&(!pk||(p.packs||[]).some(f=>f.pack.startsWith(pk)))&&(!t||[p.name,p.code,p.en,p.jp].join(' ').toLowerCase().includes(t)));
+ let L=Object.values(P).filter(p=>(cat==='all'||p.cat===cat)&&(!o||invQ(p.id)>0)&&(!lv||WR[p.id]?.level===lv)&&(!pk||(p.plist||[]).some(f=>String(f.code).startsWith(pk))||(p.packs||[]).some(f=>f.pack.startsWith(pk)))&&(!t||[p.name,p.code,p.en,p.jp].join(' ').toLowerCase().includes(t)));
  const k={def:(a,b)=>Object.keys(TZ).indexOf(a.cat)-Object.keys(TZ).indexOf(b.cat),wd:(a,b)=>(wtyp(b.id)??-1)-(wtyp(a.id)??-1),wa:(a,b)=>(wtyp(a.id)??1e9)-(wtyp(b.id)??1e9),top:(a,b)=>(WR[b.id]?.max??-1)-(WR[a.id]?.max??-1),n:(a,b)=>(WR[b.id]?.n||0)-(WR[a.id]?.n||0),nm:(a,b)=>String(a.name).localeCompare(b.name,'zh-Hant')}[s]||(()=>0);L.sort(k);
  const cnt={};Object.values(P).forEach(p=>cnt[p.cat]=(cnt[p.cat]||0)+1);
  app.innerHTML=`<h1>全圖鑑 <small class="muted">${L.length}／${Object.keys(P).length}</small></h1>
@@ -70,10 +81,10 @@ function build(){const cur=LS.get('cur',{mode:'cx'});const bx=cur.mode==='bx';co
 function inv(q){const v=INV();const L=Object.entries(v).filter(([id,r])=>P[id]&&(r.q>0||r.w.length)).sort((a,b)=>Object.keys(TZ).indexOf(P[a[0]].cat)-Object.keys(TZ).indexOf(P[b[0]].cat));
  const tot=L.reduce((a,[,r])=>a+r.q,0);
  app.innerHTML=`<h1>我的倉庫</h1><p class="muted">${L.length} 種、${tot} 個零件。資料存在這台手機的瀏覽器（localStorage），換手機請用匯出／匯入。</p>
- <div class="frow"><button class="btn" id="iex">匯出 JSON</button><label class="btn ghost">匯入 JSON<input type="file" id="iim" accept="application/json" hidden></label><button class="btn ghost" id="irs">重設為網站預設</button></div>
+ <div class="frow"><button class="btn" id="iex">匯出 JSON</button><label class="btn ghost">匯入 JSON（含 phstudy 倉庫）<input type="file" id="iim" accept="application/json" hidden></label><button class="btn ghost" id="irs">重設為網站預設</button></div>
  ${L.map(([id,r])=>{const p=P[id],R=WR[id];return `<div class="card"><a class="row" style="color:inherit" href="#/part/${encodeURIComponent(id)}">${img(p.img,'pth','')}<span class="grow"><b>${esc(p.name)}</b> <span class="muted">${TZ[p.cat]}</span><br>${rangeCard(id,1)}</span></a>${invCtl(id)}${r.w.length?`<div class="wch">${r.w.map((g,i)=>`<span class="vchip"><b>${g}g</b><small>${posOf(R,g)||''}</small><a data-a="x" data-i="${i}" data-id="${esc(id)}">✕</a></span>`).join('')}</div>`:''}</div>`}).join('')||'<p class="muted">倉庫是空的，到零件頁按＋加入。</p>'}`;
  bindInv();app.querySelectorAll('.wch a').forEach(a=>a.onclick=()=>{const v=INV();v[a.dataset.id].w.splice(+a.dataset.i,1);LS.set('inv',v);inv(q)});
  $('#iex').onclick=()=>{const blob=new Blob([JSON.stringify({app:'cxgod',v:1,at:new Date().toISOString(),inv:INV(),combos:LS.get('combos',[])},null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cxgod-backup.json';a.click()};
- $('#iim').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{const d=JSON.parse(t);if(d.inv)LS.set('inv',d.inv);if(d.combos)LS.set('combos',d.combos);alert('已匯入');inv(q)}).catch(()=>alert('檔案格式不對'))};
+ $('#iim').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{const d=JSON.parse(t);if(Array.isArray(d.parts)){const v={};let n=0,miss=0;for(const x of d.parts){const id=D.phid[x.partId];if(!id){miss++;continue}(v[id]=v[id]||{q:0,w:[]}).q++;n++}const cur=INV();for(const k in cur)if(cur[k].w.length)(v[k]=v[k]||{q:0,w:[]}).w=cur[k].w;LS.set('inv',v);alert(`已匯入 phstudy 倉庫：${n} 個零件${miss?`，${miss} 個對不到`:''}`);inv(q);return}if(d.inv)LS.set('inv',d.inv);if(d.combos)LS.set('combos',d.combos);alert('已匯入');inv(q)}).catch(()=>alert('檔案格式不對'))};
  $('#irs').onclick=()=>{if(confirm('清除這台裝置的倉庫紀錄，恢復網站預設？')){localStorage.removeItem('cx_inv');inv(q)}}}
 route();
