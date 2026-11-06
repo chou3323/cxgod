@@ -144,7 +144,7 @@ function deck(arg){const cur=(arg||'').split(',').filter(x=>CMAP[x]);while(cur.l
 function sources(){app.innerHTML=`<h1>來源</h1>${Object.values(S).map(s=>`<a class="card row" style="color:inherit" href="${s[1]}" target="_blank" rel="noopener"><span class="grow"><b>${esc(s[0])}</b><br><span class="muted">${esc(s[1])}</span></span></a>`).join('')}<div class="info">資料更新：${D.built}。阿銘＝影片口述或留言親回；chou轉述＝留言找不到原文；推斷＝沒人實證。</div>`}
 function nf(){app.innerHTML='<h1>找不到</h1><a href="#/">回首頁</a>'}
 function route(){const h=location.hash.slice(1)||'/';const[path,qs]=h.split('?');const q=new URLSearchParams(qs||'');const[,a,b]=path.split('/');const id=b&&decodeURIComponent(b);
- ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,weights,mine:()=>mine(q),team,need,deck:()=>deck(id),sources}[a||'']||nf)();
+ ({'':home,combos:()=>combos(q),combo:()=>combo(id),part:()=>part(id),parts:()=>parts(q),packs:()=>packs(q),pack:()=>pack(id),spares,ratchets,guide,weights,mine:()=>mine(q),team,need,deck:()=>deck(id),sources,build:()=>build(id),inv:()=>inv(q)}[a||'']||nf)();
  document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.getAttribute('href')==='#/'+(a||'')||(x.getAttribute('href')==='#/'&&!a)));{const n=document.querySelector('#nav a.on');if(n)n.scrollIntoView({inline:'center',block:'nearest'})}window.scrollTo(0,0)}
 
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
